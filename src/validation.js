@@ -8,14 +8,14 @@ const registerValidation = data => {
       .min(3)
       .required(),
     email: Joi.string()
-      .min(5)
+      // .min(5) // REVIEW если есть валидация на email не нужно делать минимальную длину
       .required()
       .email(),
     password: Joi.string()
       .min(8)
       .required()
   });
-  return schema.validate(data);
+  return schema.validate(data, { abortEarly: false }); // REVIEW добавив этот флаг мы получим сразу все ошибки разом
 };
 
 const loginValidation = data => {
