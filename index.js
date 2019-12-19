@@ -11,5 +11,6 @@ connectMongoDB();
 app.use(express.json());
 
 app.use("/api/user", authRoute);
+app.use("/api/test", testRoutes);
 
 app.listen(PORT, () => console.log(`server up and runing on port: ${PORT}`));
