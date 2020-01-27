@@ -4,7 +4,6 @@ const Group = require("../model/Group");
 const bcrypt = require("bcryptjs");
 const { registerValidation, loginValidation } = require("../validation");
 const jwt = require("jsonwebtoken");
-const verify = require("./verifyToken");
 
 const buildErrorResponse = error =>
   error.details.reduce((resp, detail) => {
@@ -14,8 +13,8 @@ const buildErrorResponse = error =>
 
 router.post("/register", async (req, res) => {
   const { error } = registerValidation(req.body);
-  console.log("Error", error);
   if (error) {
+    console.log("Error", error);
     return res.status(400).send(buildErrorResponse(error));
   }
 
@@ -63,6 +62,7 @@ router.post("/login", async (req, res) => {
   const activeUser = {
     firstname: user.firstname,
     lastname: user.lastname,
+    group: user.group,
     token: token
   };
 
