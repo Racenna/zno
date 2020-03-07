@@ -15,7 +15,7 @@ const registerValidation = data => {
       .required(),
     group: Joi.string()
       .min(4)
-      .max(4)
+      .max(7)
       .required(),
     email: Joi.string()
       .required()

@@ -17,7 +17,8 @@ const Tests = new mongoose.Schema(
         variants: [String],
         correct: String
       }
-    ]
+    ],
+    owner: { type: mongoose.Types.ObjectId, ref: "User" }
   },
   {
     versionKey: false

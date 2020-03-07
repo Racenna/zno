@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const User = require("../model/User");
 const jwt = require("jsonwebtoken");
 const verify = require("./verifyToken");
+const User = require("../model/User");
 
 router.get("/getUserData", verify, async (req, res) => {
   try {

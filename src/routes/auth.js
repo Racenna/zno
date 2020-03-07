@@ -1,9 +1,9 @@
 const router = require("express").Router();
-const User = require("../model/User");
-const Group = require("../model/Group");
 const bcrypt = require("bcryptjs");
 const { registerValidation, loginValidation } = require("../validation");
 const jwt = require("jsonwebtoken");
+const User = require("../model/User");
+const Group = require("../model/Group");
 
 const buildErrorResponse = error =>
   error.details.reduce((resp, detail) => {
@@ -54,7 +54,6 @@ router.post("/login", async (req, res) => {
     if (error) return res.status(400).json(buildErrorResponse(error));
 
     const user = await User.findOne({ email: req.body.email });
-
     if (!user) return res.status(400).json("Email is not found");
 
     const validPass = await bcrypt.compare(req.body.password, user.password);

@@ -1,9 +1,9 @@
 const router = require("express").Router();
+const jwt = require("jsonwebtoken");
+const verify = require("./verifyToken");
 const User = require("../model/User");
 const GeneralStatistic = require("../model/GeneralStatistic");
 const QuestionsStatistic = require("../model/QuestionsStatistic");
-const jwt = require("jsonwebtoken");
-const verify = require("./verifyToken");
 
 router.post("/generalStatistic", verify, async (req, res) => {
   try {
