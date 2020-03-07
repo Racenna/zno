@@ -15,7 +15,7 @@ const Tests = new mongoose.Schema(
         theme: String,
         text: String,
         variants: [String],
-        correct: String
+        correct: [String]
       }
     ],
     owner: { type: mongoose.Types.ObjectId, ref: "User" }
