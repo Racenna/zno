@@ -12,74 +12,91 @@ const buildErrorResponse = error =>
   }, {});
 
 router.post("/register", async (req, res) => {
-  const { error } = registerValidation(req.body);
-  if (error) {
-    console.log("Error", error);
-    return res.status(400).send(buildErrorResponse(error));
-  }
+  try {
+    const { error } = registerValidation(req.body);
+    if (error) {
+      console.log("Error", error);
+      return res.status(400).json(buildErrorResponse(error));
+    }
 
-  const emailExist = await User.findOne({ email: req.body.email });
+    const emailExist = await User.findOne({ email: req.body.email });
 
-  if (emailExist)
-    return res.status(400).send({
-      email: false,
-      message: "Email address is already taken. Use another email adress"
+    if (emailExist)
+      return res.status(400).json({
+        email: false,
+        message: "Email address is already taken. Use another email adress"
+      });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+    const user = new User({
+      email: req.body.email,
+      password: hashedPassword,
+      group: req.body.group,
+      firstname: req.body.firstname,
+      lastname: req.body.lastname,
+      ot: req.body.ot
     });
 
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
-  const user = new User({
-    email: req.body.email,
-    password: hashedPassword,
-    group: req.body.group,
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
-    ot: req.body.ot
-  });
-
-  try {
     await user.save();
-    res.send({ registration: true, message: "Registration completed" });
+    res
+      .status(200)
+      .json({ registration: true, message: "Registration completed" });
   } catch (err) {
-    res.status(500).send("😅Something went wrong");
+    res.status(500).json("😅Something went wrong");
   }
 });
 
 router.post("/login", async (req, res) => {
-  const { error } = loginValidation(req.body);
-  if (error) return res.status(400).send(buildErrorResponse(error));
+  try {
+    const { error } = loginValidation(req.body);
+    if (error) return res.status(400).json(buildErrorResponse(error));
 
-  const user = await User.findOne({ email: req.body.email });
+    const user = await User.findOne({ email: req.body.email });
 
-  if (!user) return res.status(400).send("Email is not found");
+    if (!user) return res.status(400).json("Email is not found");
 
-  const validPass = await bcrypt.compare(req.body.password, user.password);
-  if (!validPass) return res.status(400).send("Invalid password");
+    const validPass = await bcrypt.compare(req.body.password, user.password);
+    if (!validPass) return res.status(400).json("Invalid password");
 
-  const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
+    const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, {
+      expiresIn: "24h"
+    });
 
-  const activeUser = {
-    firstname: user.firstname,
-    lastname: user.lastname,
-    group: user.group,
-    token: token
-  };
+    const activeUser = {
+      firstname: user.firstname,
+      lastname: user.lastname,
+      group: user.group,
+      token: token
+    };
 
-  res.json(activeUser);
+    res.status(200).json(activeUser);
+  } catch (error) {
+    res.status(500).json("😅Something went wrong");
+  }
 });
 
 router.get("/verifyEmail", async (req, res) => {
-  const user = await User.findOne({ email: req.query.email });
+  try {
+    const user = await User.findOne({ email: req.query.email });
 
-  if (!user) return res.json({ verify: true });
-  else res.json({ verify: false });
+    if (!user) return res.status(400).json({ verify: true });
+    else res.status(200).json({ verify: false });
+  } catch (error) {
+    res.status(500).json("😅Something went wrong");
+  }
 });
 
 router.get("/getGroup", async (req, res) => {
-  const groups = await Group.findOne({}, { _id: 0 });
-  if (!groups) {
-    return res.json({ Error: "error" });
-  } else res.json(groups);
+  try {
+    const groups = await Group.findOne({}, { _id: 0 });
+    if (!groups) {
+      return res.status(400).json({ Error: "error" });
+    } else res.status(200).json(groups);
+  } catch (error) {
+    res.status(500).json("😅Something went wrong");
+  }
 });
+
 module.exports = router;
