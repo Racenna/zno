@@ -7,16 +7,16 @@ const Tests = new mongoose.Schema(
       required: true
     },
     theme: {
-      type: String,
-      required: true
+      type: String
+      // required: true
     },
     questions: [
       {
         theme: String,
-        type: String,
+        questionType: String,
         images: {
           type: [String],
-          max: 3
+          validate: [arrayLimit, "{PATH} exceeds the limit of 3"]
         },
         text: String,
         variants: [String],
@@ -29,5 +29,9 @@ const Tests = new mongoose.Schema(
     versionKey: false
   }
 );
+
+function arrayLimit(val) {
+  return val.length <= 3;
+}
 
 module.exports = mongoose.model("Tests", Tests);
