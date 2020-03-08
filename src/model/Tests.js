@@ -14,6 +14,10 @@ const Tests = new mongoose.Schema(
       {
         theme: String,
         type: String,
+        images: {
+          type: [String],
+          max: 3
+        },
         text: String,
         variants: [String],
         correct: [String]
