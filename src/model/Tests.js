@@ -13,6 +13,7 @@ const Tests = new mongoose.Schema(
     questions: [
       {
         theme: String,
+        type: String,
         text: String,
         variants: [String],
         correct: [String]
