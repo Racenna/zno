@@ -23,12 +23,19 @@ router.put("/update", verify, async (req, res) => {
     if (user.group !== "Teacher")
       return res.status(400).json({ message: "Only a teacher can add theory" });
 
-    const tests = await Test.find({ theme: req.body.theme });
-    await Theory.findOneAndUpdate(req.body.oldTheme, {
-      theme: req.body.theme,
-      text: req.body.text,
-      tests
-    });
+    const tests = await Test.find({ theme: req.body.theme.toUpperCase() });
+    const theory = await Theory.findOneAndUpdate(
+      { theme: req.body.oldTheme.toUpperCase() },
+      {
+        theme: req.body.theme.toUpperCase(),
+        text: req.body.text || req.body.oldText,
+        tests
+      }
+    );
+
+    if (!theory) return res.status(400).json({ message: "Theory not found" });
+
+    await theory.save();
 
     res.status(200).json({ message: "Theory updated" });
   } catch (err) {
@@ -43,10 +50,17 @@ router.post("/add", verify, async (req, res) => {
 
     if (user.group !== "Teacher")
       return res.status(400).json({ message: "Only a teacher can add theory" });
-    const tests = await Test.find({ theme: req.body.theme });
+    const tests = await Test.find({ theme: req.body.theme.toUpperCase() });
+
+    const theoryExist = await Theory.findOne({
+      theme: req.body.theme.toUpperCase()
+    });
+    if (theoryExist) {
+      return res.status(400).json({ message: "Theory already added" });
+    }
 
     const theory = new Theory({
-      theme: req.body.theme,
+      theme: req.body.theme.toUpperCase(),
       text: req.body.text,
       tests
     });

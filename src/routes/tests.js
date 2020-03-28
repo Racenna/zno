@@ -11,7 +11,7 @@ router.post("/createTest", verify, async (req, res) => {
 
     const test = new Tests({
       name: req.body.test.name,
-      theme: req.body.test.theme,
+      theme: req.body.test.theme.toUpperCase(),
       questions: req.body.test.questions,
       owner: req.user._id
     });
