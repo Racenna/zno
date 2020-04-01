@@ -2,62 +2,62 @@ const router = require("express").Router();
 const jwt = require("jsonwebtoken");
 const verify = require("./verifyToken");
 const User = require("../model/User");
-const GeneralStatistic = require("../model/GeneralStatistic");
+const Test = require("../model/Tests");
+const TestStatistics = require("../model/TestStatistics");
 const QuestionsStatistic = require("../model/QuestionsStatistic");
 
-router.post("/generalStatistic", verify, async (req, res) => {
+router.post("/saveStatistics", verify, async (req, res) => {
   try {
     const token = req.header("auth-token");
+    if (!token) return res.status(400).json({ message: "token not found" });
 
-    if (!token) return res.status(401).json("Access denied");
+    const verify = jwt.verify(token, process.env.TOKEN_SECRET); //verify._id
+    const userID = verify._id;
 
-    const verifyed = jwt.verify(token, process.env.TOKEN_SECRET);
-    const user = await User.findOne({ _id: verifyed._id });
+    const user = await User.findById(userID);
+    if (!user) return res.status(400).json({ message: "user not found" });
 
-    if (!user) return res.status(400).json("User not found");
+    const test = await Test.findById(req.body.statisticTest.testID);
+    if (!test) return res.status(400).json({ message: "test not found" });
 
-    const statistic = new GeneralStatistic({
-      firstname: user.firstname,
-      lastname: user.lastname,
-      ot: user.ot,
-      group: user.group,
-      testID: req.body.testID,
-      result: req.body.result,
-      date: req.body.date
+    const testStatistic = new TestStatistics({
+      userID,
+      testID: req.body.statisticTest.testID,
+      result: req.body.statisticTest.result,
+      date: req.body.statisticTest.date
     });
 
-    await statistic.save();
-    res.status(200).json({ message: "compleate" });
+    for (let i = 0; i < req.body.questionArray.length; i++) {
+      const questionStatistic = new QuestionsStatistic({
+        userID,
+        testID: req.body.statisticTest.testID,
+        questionID: req.body.questionArray[i].questionID,
+        result: req.body.questionArray[i].result,
+        date: req.body.statisticTest.date
+      });
+
+      await questionStatistic.save();
+    }
+    await testStatistic.save();
+
+    res.status(200).json({ message: "Query complet" });
   } catch (err) {
-    res.status(500).json({ error: err });
+    res.status(500).json({ message: "something went wrong" });
   }
 });
 
-router.post("/questionsStatistic", verify, async (req, res) => {
+router.get("/getQuestionStatistic/:id", verify, async (req, res) => {
   try {
     const token = req.header("auth-token");
+    if (!token) return res.status(400).json({ message: "token not found" });
 
-    if (!token) return res.status(401).json("Access denied");
-
-    const verifyed = jwt.verify(token, process.env.TOKEN_SECRET);
-    const user = await User.findOne({ _id: verifyed._id });
-
-    if (!user) return res.status(400).json("User not found");
-
-    const statistic = new QuestionsStatistic({
-      firstname: user.firstname,
-      lastname: user.lastname,
-      ot: user.ot,
-      group: user.group,
-      questionID: req.body.questionID,
-      result: req.body.result,
-      date: req.body.date
+    const question = await QuestionsStatistic.find({
+      questionID: req.params.id
     });
 
-    await statistic.save();
-    res.status(200).json({ message: "compleate" });
+    res.status(200).json({ message: "Query complete", question });
   } catch (err) {
-    res.status(500).json({ error: err });
+    res.status(500).json({ message: "something went wrong", error: err });
   }
 });
 

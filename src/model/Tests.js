@@ -7,8 +7,8 @@ const Tests = new mongoose.Schema(
       required: true
     },
     theme: {
-      type: String
-      // required: true
+      type: String,
+      required: true
     },
     questions: [
       {
@@ -23,7 +23,7 @@ const Tests = new mongoose.Schema(
         correct: [String]
       }
     ],
-    owner: { type: mongoose.Types.ObjectId, ref: "User" }
+    owner: { type: mongoose.Types.ObjectId, ref: "Users" }
   },
   {
     versionKey: false

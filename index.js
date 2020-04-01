@@ -16,7 +16,7 @@ app.use(express.json());
 
 app.use("/api/user", authRoutes);
 app.use("/api/profile", profileRoutes);
-app.use("/api/statistic", statisticRoutes);
+app.use("/api/statistics", statisticRoutes);
 app.use("/api/tests", testsRoutes);
 app.use("/api/theory", theoryRoutes);
 

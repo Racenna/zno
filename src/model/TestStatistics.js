@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const questionsStatistic = new mongoose.Schema(
+const testStatistics = new mongoose.Schema(
   {
     userID: {
       type: mongoose.Types.ObjectId,
@@ -10,12 +10,8 @@ const questionsStatistic = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "Tests"
     },
-    questionID: {
-      type: mongoose.Types.ObjectId,
-      ref: "Tests"
-    },
     result: {
-      type: Boolean,
+      type: Number,
       required: true
     },
     date: {
@@ -28,4 +24,4 @@ const questionsStatistic = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("QuestionsStatistic", questionsStatistic);
+module.exports = mongoose.model("TestStatistics", testStatistics);
