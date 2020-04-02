@@ -10,13 +10,11 @@ const registerValidation = data => {
     lastname: Joi.string()
       .min(3)
       .required(),
-    ot: Joi.string()
+    fathername: Joi.string()
       .min(3)
       .required(),
-    group: Joi.string()
-      .min(4)
-      .max(7)
-      .required(),
+    group: Joi.string().allow(""),
+    status: Joi.string().required(),
     email: Joi.string()
       .required()
       .email(),

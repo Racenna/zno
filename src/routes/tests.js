@@ -6,8 +6,17 @@ const Tests = require("../model/Tests");
 router.post("/createTest", verify, async (req, res) => {
   try {
     const user = await User.findById({ _id: req.user._id });
-    if (user.group !== "Teacher")
-      return res.status(400).json({ message: "Only a teacher can add tests" });
+
+    if (user.status !== "Teacher")
+      return res
+        .status(400)
+        .json({ message: "Only a teacher can create tests" });
+
+    if (!user.verifyed)
+      return res.status(400).json({
+        message:
+          "You don't have access to this feature. Contact the admins for access."
+      });
 
     const test = new Tests({
       name: req.body.test.name,
@@ -17,18 +26,20 @@ router.post("/createTest", verify, async (req, res) => {
     });
 
     await test.save();
-    res.status(200).json({ message: "compleate" });
+
+    res.status(200).json({ message: "Test created" });
   } catch (error) {
-    res.status(500).send({ error });
+    res.status(500).send({ message: "😅Something went wrong" });
   }
 });
 
 router.get("/getTest", verify, async (req, res) => {
   try {
     const test = await Tests.findOne({ name: req.query.name });
+
     res.status(200).json({ test });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
 

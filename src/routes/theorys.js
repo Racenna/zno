@@ -10,8 +10,8 @@ router.get("/", verify, async (req, res) => {
     const theory = await Theory.find();
 
     res.status(200).json(theory);
-  } catch (err) {
-    res.status(500).json({ message: "something went wrong" });
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
 
@@ -20,10 +20,19 @@ router.put("/update", verify, async (req, res) => {
   try {
     const user = await User.findById({ _id: req.user._id });
 
-    if (user.group !== "Teacher")
-      return res.status(400).json({ message: "Only a teacher can add theory" });
+    if (user.status !== "Teacher")
+      return res
+        .status(400)
+        .json({ message: "Only a teacher can change theory" });
+
+    if (!user.verifyed)
+      return res.status(400).json({
+        message:
+          "You don't have access to this feature. Contact the admins for access."
+      });
 
     const tests = await Test.find({ theme: req.body.theme.toUpperCase() });
+
     const theory = await Theory.findOneAndUpdate(
       { theme: req.body.oldTheme.toUpperCase() },
       {
@@ -38,8 +47,8 @@ router.put("/update", verify, async (req, res) => {
     await theory.save();
 
     res.status(200).json({ message: "Theory updated" });
-  } catch (err) {
-    res.status(500).json({ message: "something went wrong" });
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
 
@@ -48,13 +57,21 @@ router.post("/add", verify, async (req, res) => {
   try {
     const user = await User.findById({ _id: req.user._id });
 
-    if (user.group !== "Teacher")
+    if (user.status !== "Teacher")
       return res.status(400).json({ message: "Only a teacher can add theory" });
+
+    if (!user.verifyed)
+      return res.status(400).json({
+        message:
+          "You don't have access to this feature. Contact the admins for access."
+      });
+
     const tests = await Test.find({ theme: req.body.theme.toUpperCase() });
 
     const theoryExist = await Theory.findOne({
       theme: req.body.theme.toUpperCase()
     });
+
     if (theoryExist) {
       return res.status(400).json({ message: "Theory already added" });
     }
@@ -68,8 +85,8 @@ router.post("/add", verify, async (req, res) => {
     await theory.save();
 
     res.status(200).json({ message: "Theory added" });
-  } catch (err) {
-    res.status(500).json({ message: "something went wrong", error: err });
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
 

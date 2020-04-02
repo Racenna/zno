@@ -14,10 +14,8 @@ const buildErrorResponse = error =>
 router.post("/register", async (req, res) => {
   try {
     const { error } = registerValidation(req.body);
-    if (error) {
-      console.log("Error", error);
-      return res.status(400).json(buildErrorResponse(error));
-    }
+
+    if (error) return res.status(400).json(buildErrorResponse(error));
 
     const emailExist = await User.findOne({ email: req.body.email });
 
@@ -31,20 +29,22 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
     const user = new User({
-      email: req.body.email,
-      password: hashedPassword,
-      group: req.body.group,
       firstname: req.body.firstname,
       lastname: req.body.lastname,
-      ot: req.body.ot
+      fathername: req.body.fathername,
+      group: req.body.group || "no group",
+      status: req.body.status,
+      email: req.body.email,
+      password: hashedPassword
     });
 
     await user.save();
+
     res
       .status(200)
       .json({ registration: true, message: "Registration completed" });
   } catch (err) {
-    res.status(500).json("😅Something went wrong");
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
 
@@ -54,25 +54,25 @@ router.post("/login", async (req, res) => {
     if (error) return res.status(400).json(buildErrorResponse(error));
 
     const user = await User.findOne({ email: req.body.email });
-    if (!user) return res.status(400).json("Email is not found");
+    if (!user) return res.status(400).json({ message: "Wrong data" });
 
     const validPass = await bcrypt.compare(req.body.password, user.password);
-    if (!validPass) return res.status(400).json("Invalid password");
+    if (!validPass) return res.status(400).json({ message: "Wrong data" });
 
-    const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET, {
-      expiresIn: "24h"
-    });
+    const token = jwt.sign({ _id: user._id }, process.env.TOKEN_SECRET);
 
     const activeUser = {
       firstname: user.firstname,
       lastname: user.lastname,
+      fathername: user.fathername,
       group: user.group,
+      status: user.status,
       token: token
     };
 
     res.status(200).json(activeUser);
   } catch (error) {
-    res.status(500).json("😅Something went wrong");
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
 
@@ -81,20 +81,22 @@ router.get("/verifyEmail", async (req, res) => {
     const user = await User.findOne({ email: req.query.email });
 
     if (!user) return res.status(400).json({ verify: true });
-    else res.status(200).json({ verify: false });
+
+    res.status(200).json({ verify: false });
   } catch (error) {
-    res.status(500).json("😅Something went wrong");
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
 
 router.get("/getGroup", async (req, res) => {
   try {
     const groups = await Group.findOne({}, { _id: 0 });
-    if (!groups) {
-      return res.status(400).json({ Error: "error" });
-    } else res.status(200).json(groups);
+
+    if (!groups) return res.status(400).json({ massage: "Groups not found" });
+
+    res.status(200).json(groups);
   } catch (error) {
-    res.status(500).json("😅Something went wrong");
+    res.status(500).json({ massage: "😅Something went wrong" });
   }
 });
 

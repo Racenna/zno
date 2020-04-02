@@ -14,18 +14,22 @@ const usersSchema = new mongoose.Schema(
       min: 3,
       max: 255
     },
-    ot: {
-      //fathername
+    fathername: {
       type: String,
       required: true,
       min: 3,
       max: 255
     },
     group: {
+      type: String
+    },
+    status: {
       type: String,
-      required: true,
-      min: 4,
-      max: 4
+      require: true
+    },
+    verifyed: {
+      type: Boolean,
+      default: false
     },
     email: {
       type: String,
