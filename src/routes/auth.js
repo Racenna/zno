@@ -67,6 +67,7 @@ router.post("/login", async (req, res) => {
       fathername: user.fathername,
       group: user.group,
       status: user.status,
+      verifyed: user.verifyed,
       token: token
     };
 

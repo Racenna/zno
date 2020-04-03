@@ -15,7 +15,8 @@ router.get("/getUserData", verify, async (req, res) => {
       fathername: user.fathername,
       email: user.email,
       group: user.group,
-      status: user.status
+      status: user.status,
+      verifyed: user.verifyed
     };
     res.status(200).json(activeUser);
   } catch (error) {
