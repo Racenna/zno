@@ -4,23 +4,24 @@ const testStatistics = new mongoose.Schema(
   {
     userID: {
       type: mongoose.Types.ObjectId,
-      ref: "Users"
+      ref: "Users",
     },
     testID: {
       type: mongoose.Types.ObjectId,
-      ref: "Tests"
+      ref: "Tests",
     },
+    question: Array,
     result: {
       type: Number,
-      required: true
+      required: true,
     },
     date: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   {
-    versionKey: false
+    versionKey: false,
   }
 );
 

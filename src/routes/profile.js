@@ -1,5 +1,4 @@
 const router = require("express").Router();
-const jwt = require("jsonwebtoken");
 const verify = require("./verifyToken");
 const User = require("../model/User");
 
@@ -16,7 +15,7 @@ router.get("/getUserData", verify, async (req, res) => {
       email: user.email,
       group: user.group,
       status: user.status,
-      verifyed: user.verifyed
+      verifyed: user.verifyed,
     };
     res.status(200).json(activeUser);
   } catch (error) {
@@ -31,7 +30,7 @@ router.put("/updateUserData", verify, async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, {
       firstname: req.body.firstname || oldUserData.firstname,
       lastname: req.body.lastname || oldUserData.lastname,
-      fathername: req.body.fathername || oldUserData.fathername
+      fathername: req.body.fathername || oldUserData.fathername,
     });
 
     res.status(200).json({ message: "User data was updated" });

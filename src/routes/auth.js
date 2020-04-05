@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../model/User");
 const Group = require("../model/Group");
 
-const buildErrorResponse = error =>
+const buildErrorResponse = (error) =>
   error.details.reduce((resp, detail) => {
     console.log(detail);
     return { ...resp, [detail.path.join(".")]: detail.message };
@@ -22,7 +22,7 @@ router.post("/register", async (req, res) => {
     if (emailExist)
       return res.status(400).json({
         email: false,
-        message: "Email address is already taken. Use another email adress"
+        message: "Email address is already taken. Use another email adress",
       });
 
     const salt = await bcrypt.genSalt(10);
@@ -35,7 +35,7 @@ router.post("/register", async (req, res) => {
       group: req.body.group || "no group",
       status: req.body.status,
       email: req.body.email,
-      password: hashedPassword
+      password: hashedPassword,
     });
 
     await user.save();
@@ -43,7 +43,7 @@ router.post("/register", async (req, res) => {
     res
       .status(200)
       .json({ registration: true, message: "Registration completed" });
-  } catch (err) {
+  } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
   }
 });
@@ -68,7 +68,7 @@ router.post("/login", async (req, res) => {
       group: user.group,
       status: user.status,
       verifyed: user.verifyed,
-      token: token
+      token: token,
     };
 
     res.status(200).json(activeUser);

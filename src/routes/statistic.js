@@ -23,8 +23,9 @@ router.post("/saveStatistics", verify, async (req, res) => {
     const testStatistic = new TestStatistics({
       userID,
       testID: req.body.statisticTest.testID,
+      question: req.body.questionArray,
       result: req.body.statisticTest.result,
-      date: req.body.statisticTest.date
+      date: req.body.statisticTest.date,
     });
 
     for (let i = 0; i < req.body.questionArray.length; i++) {
@@ -33,7 +34,7 @@ router.post("/saveStatistics", verify, async (req, res) => {
         testID: req.body.statisticTest.testID,
         questionID: req.body.questionArray[i].questionID,
         result: req.body.questionArray[i].result,
-        date: req.body.statisticTest.date
+        date: req.body.statisticTest.date,
       });
 
       await questionStatistic.save();
@@ -41,8 +42,8 @@ router.post("/saveStatistics", verify, async (req, res) => {
     await testStatistic.save();
 
     res.status(200).json({ message: "Query complet" });
-  } catch (err) {
-    res.status(500).json({ message: "something went wrong" });
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
 
@@ -52,13 +53,35 @@ router.get("/getQuestionStatistic/:id", verify, async (req, res) => {
     if (!token) return res.status(400).json({ message: "token not found" });
 
     const question = await QuestionsStatistic.find({
-      questionID: req.params.id
+      questionID: req.params.id,
     });
 
     res.status(200).json({ message: "Query complete", question });
-  } catch (err) {
-    res.status(500).json({ message: "something went wrong", error: err });
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
+
+// loged student
+router.get("/getMyStatistic", verify, async (req, res) => {
+  try {
+    const testStatistic = await TestStatistics.find({ userID: req.user._id });
+
+    res.status(200).json({ message: "Query complet", testStatistic });
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
+  }
+});
+
+router.get("/getStudentStatistic/:id", verify, async (req, res) => {
+  try {
+    const testStatistic = await TestStatistics.find({userID: req.params.id})
+
+    res.status(200).json({message: "Query complet", testStatistic})
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
+    
+  }
+})
 
 module.exports = router;
