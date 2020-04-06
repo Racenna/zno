@@ -16,7 +16,7 @@ router.get("/", verify, async (req, res) => {
 });
 
 // PUT /api/theory/update
-router.put("/update", verify, async (req, res) => {
+router.put("/update/:id", verify, async (req, res) => {
   try {
     const user = await User.findById({ _id: req.user._id });
 
@@ -28,17 +28,23 @@ router.put("/update", verify, async (req, res) => {
     if (!user.verifyed)
       return res.status(400).json({
         message:
-          "You don't have access to this feature. Contact the admins for access."
+          "You don't have access to this feature. Contact the admins for access.",
       });
 
-    const tests = await Test.find({ theme: req.body.theme.toUpperCase() });
+    const oldTheory = await Theory.findOne({ _id: req.params.id });
+
+    const tests = await Test.find({
+      theme: req.body.theme.toUpperCase() || oldTheory.theme.toUpperCase(),
+    });
 
     const theory = await Theory.findOneAndUpdate(
-      { theme: req.body.oldTheme.toUpperCase() },
+      { _id: req.params.id },
       {
-        theme: req.body.theme.toUpperCase(),
-        text: req.body.text || req.body.oldText,
-        tests
+        theme: req.body.theme.toUpperCase() || oldTheory.theme.toUpperCase(),
+        name: req.body.name || oldTheory.name,
+        image: req.body.image || oldTheory.image,
+        text: req.body.text || oldTheory.text,
+        tests,
       }
     );
 
@@ -63,13 +69,13 @@ router.post("/add", verify, async (req, res) => {
     if (!user.verifyed)
       return res.status(400).json({
         message:
-          "You don't have access to this feature. Contact the admins for access."
+          "You don't have access to this feature. Contact the admins for access.",
       });
 
     const tests = await Test.find({ theme: req.body.theme.toUpperCase() });
 
     const theoryExist = await Theory.findOne({
-      theme: req.body.theme.toUpperCase()
+      theme: req.body.theme.toUpperCase(),
     });
 
     if (theoryExist) {
@@ -78,8 +84,10 @@ router.post("/add", verify, async (req, res) => {
 
     const theory = new Theory({
       theme: req.body.theme.toUpperCase(),
+      name: req.body.name,
+      image: req.body.image,
       text: req.body.text,
-      tests
+      tests,
     });
 
     await theory.save();
