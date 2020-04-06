@@ -15,14 +15,14 @@ router.post("/createTest", verify, async (req, res) => {
     if (!user.verifyed)
       return res.status(400).json({
         message:
-          "You don't have access to this feature. Contact the admins for access."
+          "You don't have access to this feature. Contact the admins for access.",
       });
 
     const test = new Tests({
       name: req.body.test.name,
       theme: req.body.test.theme.toUpperCase(),
       questions: req.body.test.questions,
-      owner: req.user._id
+      owner: req.user._id,
     });
 
     await test.save();

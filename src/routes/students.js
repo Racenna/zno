@@ -9,7 +9,7 @@ router.get("/getAllStudents", verify, async (req, res) => {
       { verifyed: 0, status: 0, email: 0, password: 0 }
     );
 
-    res.status(200).json({ message: "Query complet", students });
+    res.status(200).json(students);
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
   }
@@ -22,7 +22,7 @@ router.get("/getByGroup/:group", verify, async (req, res) => {
       { verifyed: 0, status: 0, email: 0, password: 0 }
     );
 
-    res.status(200).json({ message: "Query complet", students });
+    res.status(200).json(students);
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
   }
