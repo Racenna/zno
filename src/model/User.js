@@ -6,45 +6,49 @@ const usersSchema = new mongoose.Schema(
       type: String,
       required: true,
       min: 3,
-      max: 255
+      max: 255,
     },
     lastname: {
       type: String,
       required: true,
       min: 3,
-      max: 255
+      max: 255,
     },
     fathername: {
       type: String,
       required: true,
       min: 3,
-      max: 255
+      max: 255,
+    },
+    image: {
+      type: String,
+      default: "",
     },
     group: {
-      type: String
+      type: String,
     },
     status: {
       type: String,
-      require: true
+      require: true,
     },
     verifyed: {
       type: Boolean,
-      default: false
+      default: false,
     },
     email: {
       type: String,
       required: true,
-      max: 255
+      max: 255,
     },
     password: {
       type: String,
       required: true,
       min: 8,
-      max: 1024
-    }
+      max: 1024,
+    },
   },
   {
-    versionKey: false
+    versionKey: false,
   }
 );
 

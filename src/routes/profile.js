@@ -12,6 +12,7 @@ router.get("/getUserData", verify, async (req, res) => {
       firstname: user.firstname,
       lastname: user.lastname,
       fathername: user.fathername,
+      image: user.image,
       email: user.email,
       group: user.group,
       status: user.status,
@@ -31,6 +32,7 @@ router.put("/updateUserData", verify, async (req, res) => {
       firstname: req.body.firstname || oldUserData.firstname,
       lastname: req.body.lastname || oldUserData.lastname,
       fathername: req.body.fathername || oldUserData.fathername,
+      image: req.body.image || oldUserData.image,
     });
 
     res.status(200).json({ message: "User data was updated" });
