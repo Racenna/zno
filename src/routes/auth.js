@@ -81,7 +81,7 @@ router.get("/verifyEmail", async (req, res) => {
   try {
     const user = await User.findOne({ email: req.query.email });
 
-    if (!user) return res.status(400).json({ verify: true });
+    if (!user) return res.status(200).json({ verify: true });
 
     res.status(200).json({ verify: false });
   } catch (error) {
