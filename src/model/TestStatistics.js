@@ -10,6 +10,10 @@ const testStatistics = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "Tests",
     },
+    name: {
+      type: String,
+      required: true,
+    },
     question: Array,
     result: {
       type: Number,
