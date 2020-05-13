@@ -37,14 +37,37 @@ const usersSchema = new mongoose.Schema(
     },
     email: {
       type: String,
+      unique: true,
       required: true,
-      max: 255,
     },
     password: {
       type: String,
       required: true,
       min: 8,
-      max: 1024,
+    },
+    activateAccount: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+
+    // For expiring JWTs
+    sessions: {
+      type: Array,
+      required: true,
+      default: [],
+    },
+
+    // Password resets
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+
+    resetPasswordTokenExpires: {
+      type: Date,
+      required: true,
+      default: Date.now,
     },
   },
   {

@@ -1,13 +1,23 @@
 const router = require("express").Router();
 const verify = require("./verifyToken");
+// Joi
+const {
+  addTheoryValidation,
+  updateTheoryValidation,
+} = require("../validation");
+// Models
 const Theory = require("../model/Theory");
-const Test = require("../model/Tests");
-const User = require("../model/User");
 
-// GET /api/theory
+const buildErrorResponse = (error) =>
+  error.details.reduce((resp, detail) => {
+    console.log(detail);
+    return { ...resp, [detail.path.join(".")]: detail.message };
+  }, {});
+
 router.get("/", verify, async (req, res) => {
   try {
-    const theory = await Theory.find();
+    const query = { theme: req.query.theme };
+    const theory = await Theory.find(query);
 
     res.status(200).json(theory);
   } catch (error) {
@@ -15,84 +25,84 @@ router.get("/", verify, async (req, res) => {
   }
 });
 
-// PUT /api/theory/update
-router.put("/update/:id", verify, async (req, res) => {
-  try {
-    const user = await User.findById({ _id: req.user._id });
-
-    if (user.status !== "Teacher")
-      return res
-        .status(400)
-        .json({ message: "Only a teacher can change theory" });
-
-    if (!user.verifyed)
-      return res.status(400).json({
-        message:
-          "You don't have access to this feature. Contact the admins for access.",
-      });
-
-    const oldTheory = await Theory.findOne({ _id: req.params.id });
-
-    const tests = await Test.find({
-      theme: req.body.theme.toUpperCase() || oldTheory.theme.toUpperCase(),
-    });
-
-    const theory = await Theory.findOneAndUpdate(
-      { _id: req.params.id },
-      {
-        theme: req.body.theme.toUpperCase() || oldTheory.theme.toUpperCase(),
-        name: req.body.name || oldTheory.name,
-        image: req.body.image || oldTheory.image,
-        text: req.body.text || oldTheory.text,
-        tests,
-      }
-    );
-
-    if (!theory) return res.status(400).json({ message: "Theory not found" });
-
-    await theory.save();
-
-    res.status(200).json({ message: "Theory updated" });
-  } catch (error) {
-    res.status(500).json({ message: "😅Something went wrong" });
-  }
-});
-
-// POST /api/theory/add
 router.post("/add", verify, async (req, res) => {
   try {
-    const user = await User.findById({ _id: req.user._id });
+    const { error } = addTheoryValidation(req.body);
+    if (error) return res.status(400).json(buildErrorResponse(error));
 
-    if (user.status !== "Teacher")
-      return res.status(400).json({ message: "Only a teacher can add theory" });
+    if (req.user.status !== "Teacher")
+      return res.status(403).json({ message: "Only a teacher can add theory" });
 
-    if (!user.verifyed)
-      return res.status(400).json({
+    if (!req.user.verifyed)
+      return res.status(403).json({
         message:
           "You don't have access to this feature. Contact the admins for access.",
       });
 
-    const tests = await Test.find({ theme: req.body.theme.toUpperCase() });
-
-    const theoryExist = await Theory.findOne({
-      theme: req.body.theme.toUpperCase(),
-    });
-
-    if (theoryExist) {
-      return res.status(400).json({ message: "Theory already added" });
-    }
-
     const theory = new Theory({
-      theme: req.body.theme.toUpperCase(),
+      theme: req.body.theme,
       name: req.body.name,
-      image: req.body.image,
       text: req.body.text,
-      tests,
+      image: req.body.image || "",
     });
 
     await theory.save();
 
     res.status(200).json({ message: "Theory added" });
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
+  }
+});
+
+router.put("/update/:id", verify, async (req, res) => {
+  try {
+    const { error } = updateTheoryValidation(req.body);
+    if (error) return res.status(400).json(buildErrorResponse(error));
+
+    if (req.user.status !== "Teacher")
+      return res
+        .status(400)
+        .json({ message: "Only a teacher can change theory" });
+
+    if (!req.user.verifyed)
+      return res.status(400).json({
+        message:
+          "You don't have access to this feature. Contact the admins for access.",
+      });
+
+    const query = { _id: req.params.id };
+
+    const theory = await Theory.findOne(query);
+
+    if (!theory) return res.status(400).json({ message: "Theory not found" });
+
+    theory.theme = req.body.theme || theory.theme;
+    theory.name = req.body.name || theory.name;
+    theory.text = req.body.text || theory.text;
+    theory.image = req.body.image || theory.image;
+
+    await theory.save();
+
+    res.status(200).json(`Theory updated`);
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
+  }
+});
+
+router.delete("/delete/:id", verify, async (req, res) => {
+  try {
+    if (req.user.status !== "Teacher")
+      return res.status(403).json({ message: "Only a teacher can add theory" });
+
+    if (!req.user.verifyed)
+      return res.status(403).json({
+        message:
+          "You don't have access to this feature. Contact the admins for access.",
+      });
+
+    await Theory.findOneAndDelete({ _id: req.params.id });
+
+    return res.status(200).json(`Теорію видалено`);
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
   }

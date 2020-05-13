@@ -2,29 +2,36 @@ const mongoose = require("mongoose");
 
 const questionsStatistic = new mongoose.Schema(
   {
+    user: {
+      type: Object,
+      required: true,
+    },
     userID: {
       type: mongoose.Types.ObjectId,
-      ref: "Users"
+      ref: "Users",
+      required: true,
     },
     testID: {
       type: mongoose.Types.ObjectId,
-      ref: "Tests"
+      ref: "Tests",
+      required: true,
     },
     questionID: {
       type: mongoose.Types.ObjectId,
-      ref: "Tests"
+      ref: "Tests",
+      required: true,
     },
     result: {
       type: Boolean,
-      required: true
+      required: true,
     },
     date: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   {
-    versionKey: false
+    versionKey: false,
   }
 );
 

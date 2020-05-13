@@ -4,11 +4,11 @@ const groupSchema = new mongoose.Schema(
   {
     group: {
       type: [String],
-      require: true
-    }
+      require: true,
+    },
   },
   {
-    versionKey: false
+    versionKey: false,
   }
 );
 

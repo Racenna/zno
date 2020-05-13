@@ -1,18 +1,75 @@
 const router = require("express").Router();
 const verify = require("./verifyToken");
-const User = require("../model/User");
+// Joi
+const { createTestValidation, updateTestValidation } = require("../validation");
+// Models
 const Tests = require("../model/Tests");
+
+const buildErrorResponse = (error) =>
+  error.details.reduce((resp, detail) => {
+    console.log(detail);
+    return { ...resp, [detail.path.join(".")]: detail.message };
+  }, {});
+
+router.get("/getTest", verify, async (req, res) => {
+  try {
+    const query = { _id: req.query._id };
+
+    const test = await Tests.findOne(query);
+
+    res.status(200).json({ test });
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
+  }
+});
+
+router.get("/getAllTest", verify, async (req, res) => {
+  try {
+    const test = await Tests.find();
+
+    res.status(200).json(test);
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
+  }
+});
+
+router.get("/getTestByTheme", verify, async (req, res) => {
+  try {
+    const query = { theme: req.query.theme };
+
+    const test = await Tests.find(query);
+
+    res.status(200).json(test);
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
+  }
+});
+
+router.get("/checkOwner/:id", verify, async (req, res) => {
+  try {
+    const test = await Tests.findById(req.params.id);
+
+    if (req.user._id.toString() !== test.owner.toString()) {
+      return res.status(403).json(`У вас немає прав на цю функцію`);
+    }
+
+    res.status(200).json(`ok`);
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
+  }
+});
 
 router.post("/createTest", verify, async (req, res) => {
   try {
-    const user = await User.findById({ _id: req.user._id });
+    const { error } = createTestValidation(req.body.test);
+    if (error) return res.status(400).json(buildErrorResponse(error));
 
-    if (user.status !== "Teacher")
+    if (req.user.status !== "Teacher")
       return res
         .status(400)
         .json({ message: "Only a teacher can create tests" });
 
-    if (!user.verifyed)
+    if (!req.user.verifyed)
       return res.status(400).json({
         message:
           "You don't have access to this feature. Contact the admins for access.",
@@ -20,7 +77,7 @@ router.post("/createTest", verify, async (req, res) => {
 
     const test = new Tests({
       name: req.body.test.name,
-      theme: req.body.test.theme.toUpperCase(),
+      theme: req.body.test.theme,
       questions: req.body.test.questions,
       owner: req.user._id,
     });
@@ -33,11 +90,47 @@ router.post("/createTest", verify, async (req, res) => {
   }
 });
 
-router.get("/getTest", verify, async (req, res) => {
+router.put("/updateTestById/:id", verify, async (req, res) => {
   try {
-    const test = await Tests.findOne({ name: req.query.name });
+    const { error } = updateTestValidation(req.body);
+    if (error) return res.status(400).json(buildErrorResponse(error));
 
-    res.status(200).json({ test });
+    const query = { _id: req.params.id };
+
+    const test = await Tests.findById(query);
+
+    if (req.user._id.toString() !== test.owner.toString()) {
+      return res
+        .status(403)
+        .json({ message: "у вас немає прав на цю функцію" });
+    } else {
+      test.name = req.body.name || test.name;
+      test.theme = req.body.theme || test.theme;
+      test.questions = req.body.questions || test.questions;
+
+      await test.save();
+
+      return res.status(200).json("Дані оновлено");
+    }
+  } catch (error) {
+    res.status(500).json({ message: "😅Something went wrong" });
+  }
+});
+
+router.delete("/deleteTestById/:id", verify, async (req, res) => {
+  try {
+    const query = { _id: req.params.id };
+
+    const test = await Tests.findById(query);
+
+    if (req.user._id.toString() !== test.owner.toString()) {
+      return res
+        .status(403)
+        .json({ message: "у вас немає прав на цю функцію" });
+    } else {
+      await Tests.deleteOne(query);
+      return res.status(200).json(`Тест видалено`);
+    }
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
   }

@@ -2,11 +2,18 @@ const mongoose = require("mongoose");
 
 const Theory = mongoose.Schema(
   {
-    theme: String,
-    name: String,
-    image: String,
-    text: String,
-    tests: Array,
+    theme: {
+      type: String,
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    text: {
+      type: String,
+      required: true,
+    },
   },
   {
     versionKey: false,

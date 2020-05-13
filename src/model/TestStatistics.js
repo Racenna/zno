@@ -2,19 +2,28 @@ const mongoose = require("mongoose");
 
 const testStatistics = new mongoose.Schema(
   {
-    userID: {
-      type: mongoose.Types.ObjectId,
-      ref: "Users",
+    user: {
+      type: Object,
+      required: true,
+    },
+    test: {
+      type: Object,
+      required: true,
     },
     testID: {
       type: mongoose.Types.ObjectId,
       ref: "Tests",
-    },
-    name: {
-      type: String,
       required: true,
     },
-    question: Array,
+    questions: {
+      type: Array,
+      required: true,
+    },
+    userID: {
+      type: mongoose.Types.ObjectId,
+      ref: "Users",
+      required: true,
+    },
     result: {
       type: Number,
       required: true,

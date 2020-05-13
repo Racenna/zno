@@ -4,29 +4,44 @@ const Tests = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true
+      required: true,
     },
     theme: {
       type: String,
-      required: true
+      required: true,
     },
     questions: [
       {
-        theme: String,
-        questionType: String,
+        theme: {
+          type: String,
+          required: true,
+        },
+        questionType: {
+          type: String,
+          required: true,
+        },
         images: {
           type: [String],
-          validate: [arrayLimit, "{PATH} exceeds the limit of 3"]
+          validate: [arrayLimit, "{PATH} exceeds the limit of 3"],
         },
-        text: String,
-        variants: [String],
-        correct: [String]
-      }
+        text: {
+          type: String,
+          required: true,
+        },
+        variants: {
+          type: [String],
+          required: true,
+        },
+        correct: {
+          type: [String],
+          required: true,
+        },
+      },
     ],
-    owner: { type: mongoose.Types.ObjectId, ref: "Users" }
+    owner: { type: mongoose.Types.ObjectId, ref: "Users" },
   },
   {
-    versionKey: false
+    versionKey: false,
   }
 );
 
