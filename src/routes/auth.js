@@ -31,7 +31,7 @@ router.get("/activate/:hashedCode", async (req, res) => {
 
     await HashedCodeSchema.findOneAndDelete({ owner: verify.owner });
 
-    res.status(200).send("Реєстрація завершена");
+    res.status(200).json("Реєстрація завершена");
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
   }
@@ -53,7 +53,8 @@ router.get("/getGroup", async (req, res) => {
   try {
     const groups = await Group.findOne({}, { _id: 0 });
 
-    if (!groups) return res.status(400).json({ massage: "Groups not found" });
+    if (!groups)
+      return res.status(400).json({ massage: "Групи не були знайдені" });
 
     res.status(200).json(groups);
   } catch (error) {
@@ -71,7 +72,7 @@ router.post("/register", async (req, res) => {
     if (emailExist)
       return res.status(400).json({
         email: false,
-        message: "Email address is already taken. Use another email adress",
+        message: "Пошта вже використовується. Використайте іншу пошту",
       });
 
     const salt = await bcrypt.genSalt(10);
@@ -127,7 +128,7 @@ router.post("/register", async (req, res) => {
     const mailOptions = {
       from: `ZNO Android App <${process.env.EMAIL}>`,
       to: req.body.email,
-      subject: "Verification email",
+      subject: "Підтвердження пошти",
       text: `Ласкаво просимо до Zno4Android! Натисніть на посилання:
       ${process.env.DOMAIN}/api/user/activate/${hashedCode}`,
       html: `<h4>Ласкаво просимо до Zno4Android! Натисніть на посилання</h4>
@@ -157,10 +158,11 @@ router.post("/login", async (req, res) => {
     if (error) return res.status(400).json(buildErrorResponse(error));
 
     const user = await User.findOne({ email: req.body.email });
-    if (!user) return res.status(401).json({ message: "Wrong data" });
+    if (!user) return res.status(401).json({ message: "Невірно введені дані" });
 
     const validPass = await bcrypt.compare(req.body.password, user.password);
-    if (!validPass) return res.status(401).json({ message: "Wrong data" });
+    if (!validPass)
+      return res.status(401).json({ message: "Невірно введені дані" });
 
     // Add a new valid session to the database
     const sessionId = crypto.randomBytes(32).toString("hex");

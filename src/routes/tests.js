@@ -53,7 +53,7 @@ router.get("/checkOwner/:id", verify, async (req, res) => {
       return res.status(403).json(`У вас немає прав на цю функцію`);
     }
 
-    res.status(200).json(`ok`);
+    res.status(200).json({ message: `ok` });
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
   }
@@ -67,12 +67,12 @@ router.post("/createTest", verify, async (req, res) => {
     if (req.user.status !== "Teacher")
       return res
         .status(400)
-        .json({ message: "Only a teacher can create tests" });
+        .json({ message: "Тільки вчитель може створювати тест" });
 
-    if (!req.user.verifyed)
+    if (!req.user.verified)
       return res.status(400).json({
         message:
-          "You don't have access to this feature. Contact the admins for access.",
+          "Ви не маєте доступу до цієї функції. Зв'яжіться з розробником для отримання доступу.",
       });
 
     const test = new Tests({
@@ -84,9 +84,9 @@ router.post("/createTest", verify, async (req, res) => {
 
     await test.save();
 
-    res.status(200).json({ message: "Test created" });
+    res.status(200).json({ message: "Тест створено" });
   } catch (error) {
-    res.status(500).send({ message: "😅Something went wrong" });
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
 
@@ -110,7 +110,7 @@ router.put("/updateTestById/:id", verify, async (req, res) => {
 
       await test.save();
 
-      return res.status(200).json("Дані оновлено");
+      return res.status(200).json({ message: "Дані оновлено" });
     }
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
@@ -129,7 +129,7 @@ router.delete("/deleteTestById/:id", verify, async (req, res) => {
         .json({ message: "у вас немає прав на цю функцію" });
     } else {
       await Tests.deleteOne(query);
-      return res.status(200).json(`Тест видалено`);
+      return res.status(200).json({ message: `Тест видалено` });
     }
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });

@@ -31,7 +31,7 @@ const usersSchema = new mongoose.Schema(
       type: String,
       require: true,
     },
-    verifyed: {
+    verified: {
       type: Boolean,
       default: false,
     },

@@ -8,7 +8,7 @@ router.get("/getByGroup/:group", verify, async (req, res) => {
     const query = { group: req.params.group };
 
     const students = await User.find(query, {
-      verifyed: 0,
+      verified: 0,
       status: 0,
       email: 0,
       password: 0,
@@ -32,7 +32,7 @@ router.get("/getAllStudents", verify, async (req, res) => {
       const query = { group: req.query.group };
 
       users = await User.find(query, {
-        verifyed: 0,
+        verified: 0,
         status: 0,
         email: 0,
         password: 0,
@@ -45,7 +45,7 @@ router.get("/getAllStudents", verify, async (req, res) => {
       users = await User.find(
         {},
         {
-          verifyed: 0,
+          verified: 0,
           status: 0,
           email: 0,
           password: 0,

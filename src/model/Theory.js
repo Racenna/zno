@@ -14,6 +14,10 @@ const Theory = mongoose.Schema(
       type: String,
       required: true,
     },
+    files: {
+      type: [String],
+      required: false,
+    },
   },
   {
     versionKey: false,

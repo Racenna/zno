@@ -30,7 +30,7 @@ router.get("/getUserData", verify, async (req, res) => {
       email: req.user.email,
       group: req.user.group,
       status: req.user.status,
-      verifyed: req.user.verifyed,
+      verified: req.user.verified,
       activateAccount: req.user.activateAccount,
     };
 
@@ -74,10 +74,10 @@ router.get("/verifyTeacher", verify, async (req, res) => {
     const mailOptions = {
       from: `${req.user.lastname} ${req.user.firstname} ${req.user.fathername} <${req.user.email}>`,
       to: process.env.EMAIL,
-      subject: "Verification teacher as trusted teacher",
+      subject: "Підтвердження вчителя",
       text: `${req.user.email} 
-      Hello, I'm ${req.user.lastname} ${req.user.firstname} ${req.user.fathername}, I want to get access to teacher feature
-      click this link to verify this teacher ${process.env.DOMAIN}/api/profile/activate/teacher/${hashedCode}`,
+      Привіт, я ${req.user.lastname} ${req.user.firstname} ${req.user.fathername}, я хочу отримати доступ до функціоналу вчителя
+      клікніть по цьому посиланню щоб отримати статус "вчитель"  ${process.env.DOMAIN}/api/profile/activate/teacher/${hashedCode}`,
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -89,7 +89,7 @@ router.get("/verifyTeacher", verify, async (req, res) => {
     });
     await hashSchema.save();
 
-    res.status(200).json("ok");
+    res.status(200).json({ message: "ok" });
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
   }
@@ -104,13 +104,13 @@ router.get("/activate/teacher/:hashedCode", async (req, res) => {
     await User.findByIdAndUpdate(
       { _id: verify.owner },
       {
-        verifyed: true,
+        verified: true,
       }
     );
 
     await HashedCodeSchema.findOneAndDelete({ owner: verify.owner });
 
-    res.status(200).send("Аккаунт підтверджено ");
+    res.status(200).json("Аккаунт підтверджено ");
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
   }
@@ -157,13 +157,13 @@ router.post("/forgotPassword", async (req, res) => {
       const mailOptions = {
         from: `ZNO Android App <${process.env.EMAIL}>`,
         to: req.body.email,
-        subject: "Forgot password",
+        subject: "Забув пароль",
         text: ``,
         html: `
         <div>
-          <h3>Confirmation code</h3>
-          <p>Copy confirmation code and paste into the appropriate field in the application:</p>
-          <b>${user.resetPasswordToken}</b>
+          <h3>Код підтвердження</h3>
+          <p>Скопіюйте код підтвердження і вставте у відповідне поле в мобільному застосунку:</p>
+          <h3>${user.resetPasswordToken}</h3>
         </div>
         `,
       };
@@ -180,13 +180,13 @@ router.post("/forgotPassword", async (req, res) => {
         `New reset token for ${user.email}: ${user.resetPasswordToken}`
       );
 
-      res
-        .status(200)
-        .json({ message: "Please check your email inbox and spam folder" });
+      res.status(200).json({
+        message: "Перевірте вашу пошту. Повідомлення може знаходитись в 'спам'",
+      });
     } else {
-      res
-        .status(200)
-        .json({ message: "Please check your email inbox and spam folder" });
+      res.status(200).json({
+        message: "Перевірте вашу пошту. Повідомлення може знаходитись в 'спам'",
+      });
     }
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
@@ -222,11 +222,13 @@ router.post("/resetPassword", async (req, res) => {
       user.sessions = [];
       await user.save();
 
-      res.status(200).json(`Password for ${user.email} successfully reset`);
-    } else {
       res
-        .status(400)
-        .json("This password reset link is either expired or invalid");
+        .status(200)
+        .json({ message: `Пароль для ${user.email} успішно відновлено` });
+    } else {
+      res.status(400).json({
+        message: "Цей код підтвердження для відновлення вже недійсний",
+      });
     }
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
@@ -238,7 +240,7 @@ router.post("/signout", verify, async (req, res) => {
     req.user.sessions = [];
     await req.user.save();
 
-    res.status(200).json({ message: "Signed out from all sessions" });
+    res.status(200).json({ message: "Вихід із усіх сеансів" });
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
   }
@@ -256,7 +258,14 @@ router.put("/updateUserData", verify, async (req, res) => {
 
     req.user.save();
 
-    res.status(200).json({ message: "User data was updated" });
+    const user = {
+      firstname: req.user.firstname,
+      lastname: req.user.lastname,
+      fathername: req.user.fathername,
+      image: req.user.image,
+    };
+
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
   }
@@ -272,7 +281,7 @@ router.put("/changePassword", verify, async (req, res) => {
       req.user.password
     );
     if (!isPasswordCorrect)
-      return res.status(400).json({ message: "Old password is not correct" });
+      return res.status(400).json({ message: "Старий пароль невірний" });
 
     const salt = await bcrypt.genSalt(10);
     const hashedNewPassword = await bcrypt.hash(req.body.newPassword, salt);
@@ -280,7 +289,7 @@ router.put("/changePassword", verify, async (req, res) => {
     req.user.password = hashedNewPassword;
     await req.user.save();
 
-    res.status(200).json({ status: `ok`, message: "Updated your password" });
+    res.status(200).json({ status: `ok`, message: "Пароль оновлено" });
   } catch (error) {
     res.status(500).json({ message: "😅Something went wrong" });
   }

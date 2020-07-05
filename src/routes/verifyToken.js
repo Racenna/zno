@@ -8,14 +8,14 @@ module.exports = async function (req, res, next) {
 
     if (!token) return res.status(401).json({ message: "Access denied" });
 
-    const verifyed = jwt.verify(token, process.env.TOKEN_SECRET);
+    const verified = jwt.verify(token, process.env.TOKEN_SECRET);
 
-    const user = await User.findById({ _id: verifyed._id });
+    const user = await User.findById({ _id: verified._id });
 
     if (!user)
       return res.status(401).json({ message: "Authorization does not exist" });
 
-    if (!user.sessions.includes(verifyed.sessionId))
+    if (!user.sessions.includes(verified.sessionId))
       return res.status(401).json({ message: "Authorization expired" });
 
     req.user = user;

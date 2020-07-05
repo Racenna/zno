@@ -4,6 +4,7 @@ const verify = require("./verifyToken");
 const { addThemeValidation, updateThemeValidation } = require("../validation");
 // Models
 const Theme = require("../model/Theme");
+const Tests = require("../model/Tests");
 
 const buildErrorResponse = (error) =>
   error.details.reduce((resp, detail) => {
@@ -27,12 +28,14 @@ router.post("/addTheme", verify, async (req, res) => {
     if (error) return res.status(400).json(buildErrorResponse(error));
 
     if (req.user.status !== "Teacher")
-      return res.status(400).json({ message: "Only a teacher can add theme" });
+      return res
+        .status(400)
+        .json({ message: "Тільки вчителя можуть додавати теми" });
 
-    if (!req.user.verifyed)
+    if (!req.user.verified)
       return res.status(400).json({
         message:
-          "You don't have access to this feature. Contact the admins for access.",
+          "Ви не маєте доступу до цієї функції. Зв'яжіться з розробником для отримання доступу.",
       });
 
     const query = { theme: req.body.theme };
@@ -41,7 +44,7 @@ router.post("/addTheme", verify, async (req, res) => {
 
     if (themeExist)
       return res.status(400).json({
-        message: "theme is already exist.",
+        message: "Тема вже існує.",
       });
 
     const theme = new Theme({
@@ -50,9 +53,9 @@ router.post("/addTheme", verify, async (req, res) => {
 
     await theme.save();
 
-    res.status(200).json("Theme created");
+    res.status(200).json({ message: "Тема створена" });
   } catch (error) {
-    res.status(500).send({ message: "😅Something went wrong" });
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
 
@@ -62,46 +65,63 @@ router.put("/updateTheme/:id", verify, async (req, res) => {
     if (error) return res.status(400).json(buildErrorResponse(error));
 
     if (req.user.status !== "Teacher")
-      return res.status(400).json({ message: "Only a teacher can add theme" });
+      return res
+        .status(400)
+        .json({ message: "Тільки вчителя можуть оновлювати тему" });
 
-    if (!req.user.verifyed)
+    if (!req.user.verified)
       return res.status(400).json({
         message:
-          "You don't have access to this feature. Contact the admins for access.",
+          "Ви не маєте доступу до цієї функції. Зв'яжіться з розробником для отримання доступу.",
       });
 
     const query = { _id: req.params.id };
 
     const data = await Theme.findOne(query);
 
-    data.theme = req.body.theme || data.theme;
+    if (req.body.theme !== data.theme) {
+      if (req.body.theme === "") {
+        req.body.theme = data.theme;
+      }
 
-    await data.save();
+      await Tests.updateMany(
+        { theme: data.theme },
+        { $set: { theme: req.body.theme } }
+      );
 
-    res.status(200).json("Theme updated");
+      data.theme = req.body.theme;
+
+      await data.save();
+
+      return res.status(200).json({ message: "Тему змінено" });
+    } else {
+      return res.status(200).json({ message: "Тему змінено" });
+    }
   } catch (error) {
-    res.status(500).send({ message: "😅Something went wrong" });
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
 
 router.delete("/deleteTheme/:id", verify, async (req, res) => {
   try {
     if (req.user.status !== "Teacher")
-      return res.status(400).json({ message: "Only a teacher can add theme" });
+      return res
+        .status(400)
+        .json({ message: "Тільки вчителя можуть видаляти теми" });
 
-    if (!req.user.verifyed)
+    if (!req.user.verified)
       return res.status(400).json({
         message:
-          "You don't have access to this feature. Contact the admins for access.",
+          "Ви не маєте доступу до цієї функції. Зв'яжіться з розробником для отримання доступу.",
       });
 
     const query = { _id: req.params.id };
 
     await Theme.findOneAndDelete(query);
 
-    res.status(200).json("Theme deleted");
+    res.status(200).json({ message: "Тема видалена" });
   } catch (error) {
-    res.status(500).send({ message: "😅Something went wrong" });
+    res.status(500).json({ message: "😅Something went wrong" });
   }
 });
 
